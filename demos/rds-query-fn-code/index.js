@@ -1,10 +1,5 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
 const mysql = require('mysql2')
 const AWS = require('aws-sdk')
-const fs = require('fs')
-const path = require('path')
 require('dotenv').config();
 
 // the env LOCALSTACK_HOSTNAME is automatically injected and available
@@ -18,10 +13,11 @@ const secrets = new AWS.SecretsManager({
   region: 'us-east-1',
 })
 
-exports.handler = async (e) => {
+// awslocal lambda invoke --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "select Author from books", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
+// cat output
+exports.handler = async (event, context) => {
   try {
-    const { config } = e.params
-    const { password, username, dbname, port } = await getSecretValue(config.credsSecretName)
+    const { password, username, dbname, port } = await getSecretValue(event.secretName)
     const connection = mysql.createConnection({
       host: hostname,
       user: username,
@@ -33,11 +29,10 @@ exports.handler = async (e) => {
 
     connection.connect()
 
-    const sqlScript = fs.readFileSync(path.join(__dirname, 'script.sql')).toString()
-    const res = await query(connection, sqlScript)
+    const res = await query(connection, event.sqlQuery)
 
     return {
-      status: 'OK',
+      status: 'SUCCESS',
       results: res
     }
   } catch (err) {
