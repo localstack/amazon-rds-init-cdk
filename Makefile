@@ -23,7 +23,7 @@ bootstrap:
 
 ## Deploy the CDK sample
 deploy:
-		cdklocal deploy
+		cdklocal deploy --require-approval never
 
 ## Start LocalStack in detached mode
 start:

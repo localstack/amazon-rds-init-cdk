@@ -1,0 +1,82 @@
+name: Deploy on LocalStack 
+
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  smoke-test:
+    name: Setup infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Setup Nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: |
+          make install
+
+      - name: Start LocalStack
+        env:
+          LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
+          LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
+        run: |
+          mkdir ls_test
+          docker pull localstack/localstack-pro:latest
+          # Start LocalStack in the background
+          DEBUG=1 RDS_MYSQL_DOCKER=1 localstack start -d
+          # Wait 30 seconds for the LocalStack container to become ready before timing out
+          echo "Waiting for LocalStack startup..."
+          localstack wait -t 15
+          echo "Startup complete"
+
+      - name: Deploy the application
+        env: 
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          make build
+          make bootstrap
+          make deploy
+
+      - name: Show Logs
+        if: failure()
+        run: |
+          localstack logs
+
+      - name: Smoke Test
+        run: |
+          awslocal --version
+          awslocal lambda invoke --cli-binary-format raw-in-base64-out --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "show tables", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
+          echo "show tables:"
+          cat output
+          awslocal lambda invoke --cli-binary-format raw-in-base64-out --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "select Author from Books", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
+          echo "select Author from Books:"
+          cat output
+          return_status=$(cat output | jq -r .status)
+          if [ "SUCCESS" !=  ${return_status} ]; then
+            echo "unexpected response: ${return_status}"
+            cat output
+            exit 1
+          fi
+      - name: Show Logs
+        if: failure()
+        run: |
+          localstack logs

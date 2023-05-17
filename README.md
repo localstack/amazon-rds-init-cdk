@@ -96,10 +96,15 @@ We added a lambda function `my-lambda-rds-query-helper` for demo purpose, it can
 
 The lambda expects a query using the parameter `sqlQuery`, and the secret containing the database connection details with the key `secretName`. 
 
-For example, you query the authors of books like this:
+For example, you query the authors of books like this for AWS CLI v1:
 
 ```shell
 awslocal lambda invoke --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "select Author from books", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
+```
+
+If you are using AWS CLI v2, please use the following:
+```shell
+awslocal lambda invoke --cli-binary-format raw-in-base64-out --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "select Author from books", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
 ```
 
 To see the actual result, check the `output`:
