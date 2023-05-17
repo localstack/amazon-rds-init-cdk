@@ -13,8 +13,11 @@ const secrets = new AWS.SecretsManager({
   region: 'us-east-1',
 })
 
-// awslocal lambda invoke --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "select Author from books", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
-// cat output
+// the function expects "secretName" and "sqlQuery" as payload
+// sample call using aws-cli:
+//     $ awslocal lambda invoke --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "select Author from books", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
+// the result is in the 'output' file:
+//     $ cat output
 exports.handler = async (event, context) => {
   try {
     const { password, username, dbname, port } = await getSecretValue(event.secretName)
