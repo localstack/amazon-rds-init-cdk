@@ -24,7 +24,7 @@ More details about the original sample can be found in the following AWS blog po
 
 ## Architecture Diagram
 
-TODO
+![Diagram](app_diagram.png)
 
 * [RDS](https://docs.localstack.cloud/user-guide/aws/rds/) as the central part of this demo, will be initialized and pre-filled with data
 * [Lambda](https://docs.localstack.cloud/user-guide/aws/lambda/) to initialize the database, and query data
