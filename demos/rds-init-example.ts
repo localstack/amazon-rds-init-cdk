@@ -8,6 +8,8 @@ import { DockerImageCode } from '@aws-cdk/aws-lambda'
 import { InstanceClass, InstanceSize, InstanceType, Port, SubnetType, Vpc } from '@aws-cdk/aws-ec2'
 import { RetentionDays } from '@aws-cdk/aws-logs'
 import { Credentials, DatabaseInstance, DatabaseInstanceEngine, DatabaseSecret, MysqlEngineVersion } from '@aws-cdk/aws-rds'
+import * as lambda from '@aws-cdk/aws-lambda'
+
 
 export class RdsInitStackExample extends Stack {
   constructor (scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -43,7 +45,7 @@ export class RdsInitStackExample extends Stack {
       },
       credentials: Credentials.fromSecret(creds),
       vpc: vpc,
-      port: 3306,
+      port: 3306, // note: this port will change for LocalStack, because a freely available local port is chosen
       databaseName: 'main',
       allocatedStorage: 20,
       instanceIdentifier,
@@ -72,10 +74,30 @@ export class RdsInitStackExample extends Stack {
     initializer.customResource.node.addDependency(dbServer)
 
     // allow the initializer function to connect to the RDS instance
-    dbServer.connections.allowFrom(initializer.function, Port.tcp(3306))
+    dbServer.connections.allowFrom(initializer.function, Port.tcp(3306)) // note: not required for LocalStack
 
     // allow initializer function to read RDS instance creds secret
     creds.grantRead(initializer.function)
+    
+    // create a new Lambda to run queries against the database for testing purpose after init
+    const lambdaQuery = new lambda.Function(this, 'MyLambdaRDSQueryHelper', {
+      code: new lambda.AssetCode(`${__dirname}/rds-query-fn-code`),
+      handler: 'index.handler',
+      runtime: lambda.Runtime.NODEJS_16_X,
+      memorySize: 1024,
+      timeout: cdk.Duration.seconds(300),
+      functionName: "my-lambda-rds-query-helper"
+    })
+
+      /* eslint no-new: 0 */
+      new CfnOutput(this, 'secretName', { 
+        value: credsSecretName 
+      })
+    
+    /* eslint no-new: 0 */
+    new CfnOutput(this, 'functionName', { 
+      value: lambdaQuery.functionName 
+    })
 
     /* eslint no-new: 0 */
     new CfnOutput(this, 'RdsInitFnResponse', {
