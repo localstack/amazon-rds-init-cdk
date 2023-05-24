@@ -27,7 +27,7 @@ deploy:
 
 ## Start LocalStack in detached mode
 start:
-		localstack start -d
+		RDS_MYSQL_DOCKER=1 localstack start -d
 
 ## Stop the Running LocalStack container
 stop:
