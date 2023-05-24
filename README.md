@@ -190,7 +190,7 @@ const lambdaQuery = new lambda.Function(this, 'MyLambdaRDSQueryHelper', {
 
 ### The CdkResourceInitializer construct
 
-TThe `CDKResourceInitializer` CDK construct generalizes the proposed solution, it encapsulates the integration requirements behind `CloudFormation Custom Resources` and `CDK`, to support the execution of AWS Lambda functions with custom initialization logic. 
+The `CDKResourceInitializer` CDK construct generalizes the proposed solution, it encapsulates the integration requirements behind `CloudFormation Custom Resources` and `CDK`, to support the execution of AWS Lambda functions with custom initialization logic. 
 The implementation can be found in `lib/resource-initializer.ts`.
 
 ## Learn More
