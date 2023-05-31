@@ -14,6 +14,11 @@ jobs:
   smoke-test:
     name: Setup infrastructure
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # run test with the default, which is "mariadb", and the feature flag
+        # which will run mysql in a separate container
+        mysql-feature-flag: ["default (mariadb)", "mysql"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -36,11 +41,17 @@ jobs:
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
           LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
+          MYSQL_FEATURE_FLAG: ${{ matrix.mysql-feature-flag }}
         run: |
           mkdir ls_test
+          ls -la ls_test
           docker pull localstack/localstack-pro:latest
           # Start LocalStack in the background
-          DEBUG=1 RDS_MYSQL_DOCKER=1 localstack start -d
+          if [ "mysql" ==  ${MYSQL_FEATURE_FLAG} ]; then
+            DEBUG=1 RDS_MYSQL_DOCKER=1 localstack start -d
+          else
+            DEBUG=1 localstack start -d
+          fi
           # Wait 30 seconds for the LocalStack container to become ready before timing out
           echo "Waiting for LocalStack startup..."
           localstack wait -t 15
@@ -77,6 +88,6 @@ jobs:
             exit 1
           fi
       - name: Show Logs
-        if: failure()
+        if: always()
         run: |
           localstack logs
