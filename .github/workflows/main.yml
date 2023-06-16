@@ -9,6 +9,10 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    # “At 00:00 on Sunday.”
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
 
 jobs:
   smoke-test:
@@ -48,9 +52,9 @@ jobs:
           docker pull localstack/localstack-pro:latest
           # Start LocalStack in the background
           if [ "mysql" ==  ${MYSQL_FEATURE_FLAG} ]; then
-            DEBUG=1 RDS_MYSQL_DOCKER=1 localstack start -d
+            LS_LOG=trace RDS_MYSQL_DOCKER=1 localstack start -d
           else
-            DEBUG=1 localstack start -d
+            LS_LOG=trace localstack start -d
           fi
           # Wait 30 seconds for the LocalStack container to become ready before timing out
           echo "Waiting for LocalStack startup..."
@@ -67,11 +71,6 @@ jobs:
           make bootstrap
           make deploy
 
-      - name: Show Logs
-        if: failure()
-        run: |
-          localstack logs
-
       - name: Smoke Test
         run: |
           awslocal --version
@@ -87,7 +86,33 @@ jobs:
             cat output
             exit 1
           fi
+
       - name: Show Logs
         if: always()
         run: |
           localstack logs
+
+      - name: Send a Slack notification
+        if: failure() || github.event_name != 'pull_request'
+        uses: ravsamhq/notify-slack-action@v2
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: "{workflow} has {status_message}"
+          message_format: "{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}>"
+          footer: "Linked Repo <{repo_url}|{repo}> | <{run_url}|View Workflow run>"
+          notify_when: "failure"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Generate a Diagnostic Report
+        if: failure()
+        run: |
+          curl -s localhost:4566/_localstack/diagnose | gzip -cf > diagnose.json.gz
+
+      - name: Upload the Diagnostic Report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: diagnose.json.gz
+          path: ./diagnose.json.gz
