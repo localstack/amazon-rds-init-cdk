@@ -24,6 +24,7 @@ jobs:
             database-type: ${{ inputs.database_type || 'mysql' }}
             localstack-version: ${{ inputs.release_tag || 'latest'}}
     upload:
+      needs: build
       name: Upload Release Asset
       runs-on: ubuntu-latest
       steps:
