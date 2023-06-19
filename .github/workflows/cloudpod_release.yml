@@ -4,32 +4,45 @@ on:
             release_tag:
                 type: string
                 required: true
+            database_type: 
+                type: string
+                required: true
+    push:
+        paths-ignore:
+            - 'README.md'
+        branches:
+            - main
+            - cloudpod_workflow
 
 name: Create Release
 jobs:
     build:
-        uses: ./.github/workflows/main.yml
+        uses: ./.github/workflows/setup.yml
         secrets: inherit
+        with:
+            store-cloudpod: "true"
+            database-type: ${{ inputs.database_type || 'mysql' }}
+            localstack-version: ${{ inputs.release_tag || 'latest'}}
     upload:
       name: Upload Release Asset
       runs-on: ubuntu-latest
       steps:
-        - name: Save the Cloud Pod 
-          uses: HarshCasper/cloud-pod-save-action@0.1.0
+        - name: Download Artifact
+          uses: actions/download-artifact@v3
           with:
-            name: 'release-pod.zip'
-            location: 'disk'
-            directory: '.' 
+            name: cloudpod
+        - name: Display structure of downloaded files
+          run: ls -R
         - name: Build project # This would actually build your project, using zip for an example artifact
           run: |
-            echo "Cloudpod Release Version ${{ inputs.release_tag }}" > Release.txt
+            echo "Cloudpod Release Version ${{ inputs.release_tag || 'latest'}}" > Release.txt
         - name: Create Release
           id: create_release
           uses: softprops/action-gh-release@v1
           with:
-            tag_name: "v-${{ inputs.release_tag }}"
-            name: "Cloudpod for LocalStack release ${{ inputs.release_tag }}"
-            body: "Test Release ${{ inputs.release_tag }}"
+            tag_name: "v-${{ inputs.release_tag || 'latest'}}"
+            name: "Cloudpod for LocalStack release ${{ inputs.release_tag || 'latest'}}"
+            body: "Test Release ${{ inputs.release_tag || 'latest'}} for database ${{ inputs.database_type || 'mysql' }}"
             files: |
                 ./release-pod.zip
                 Release.txt
