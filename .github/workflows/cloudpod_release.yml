@@ -1,0 +1,35 @@
+on:
+    workflow_dispatch:
+        inputs:
+            release_tag:
+                type: string
+                required: true
+
+name: Create Release
+jobs:
+    build:
+        uses: ./.github/workflows/main.yml
+        secrets: inherit
+    upload:
+      name: Upload Release Asset
+      runs-on: ubuntu-latest
+      steps:
+        - name: Save the Cloud Pod 
+          uses: HarshCasper/cloud-pod-save-action@0.1.0
+          with:
+            name: 'release-pod.zip'
+            location: 'disk'
+            directory: '.' 
+        - name: Build project # This would actually build your project, using zip for an example artifact
+          run: |
+            echo "Cloudpod Release Version ${{ inputs.release_tag }}" > Release.txt
+        - name: Create Release
+          id: create_release
+          uses: softprops/action-gh-release@v1
+          with:
+            tag_name: "v-${{ inputs.release_tag }}"
+            name: "Cloudpod for LocalStack release ${{ inputs.release_tag }}"
+            body: "Test Release ${{ inputs.release_tag }}"
+            files: |
+                ./release-pod.zip
+                Release.txt
