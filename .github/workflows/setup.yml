@@ -67,7 +67,7 @@ jobs:
         - name: Store Pod
           if: ${{ inputs.store-cloudpod == 'true' }}
           run: |
-            localstack pod save file://pod.zip
+            localstack pod save file://release-pod.zip
         - name: Upload Pod as Artifact
           if: ${{ inputs.store-cloudpod == 'true' }}
           uses: actions/upload-artifact@v3
