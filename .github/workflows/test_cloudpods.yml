@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: 
-        tag: ${{ needs.get-releases.outputs.matrix }}
+        tag: ${{ fromJson(needs.get-releases.outputs.matrix) }}
         db: ['mariadb', 'mysql']
     steps:
       - name: Start LocalStack Default
