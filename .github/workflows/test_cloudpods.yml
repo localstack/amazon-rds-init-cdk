@@ -38,7 +38,7 @@ jobs:
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
           LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
-          MYSQL_FEATURE_FLAG: ${{ matrix.mysql-feature-flag }}
+          MYSQL_FEATURE_FLAG: ${{ matrix.db }}
         run: |
           mkdir ls_test
           ls -la ls_test
