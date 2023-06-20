@@ -41,7 +41,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install localstack awscli-local
-      - name: Start LocalStack Default
+      - name: Start LocalStack
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
           LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
@@ -63,7 +63,7 @@ jobs:
       - name: Retrieve Pod mariadb
         uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repo: 'dsaltares/godot-wild-jam-18'
+          repo: $GITHUB_REPOSITORY
           version: 'tags/${{ matrix.tag }}'
           file: 'release-pod-${{ matrix.db }}.zip'
           target: './release-pod.zip'
