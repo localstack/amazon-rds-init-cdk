@@ -9,7 +9,6 @@ on:
       - 'README.md'
     branches:
       - main
-      - cloudpod_workflow
             
 permissions:
   contents: write
