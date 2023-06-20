@@ -34,6 +34,13 @@ jobs:
         tag: ${{ fromJson(needs.get-releases.outputs.matrix) }}
         db: ['mariadb', 'mysql']
     steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Dependencies
+        run: |
+          pip install localstack awscli-local
       - name: Start LocalStack Default
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
