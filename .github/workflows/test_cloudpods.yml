@@ -22,14 +22,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        echo "matrix=$(gh api repos/$GITHUB_REPOSITORY/releases | jq -r '[.[].tag_name]')" >> $GITHUB_OUTPUT
+        echo "matrix=\"$(gh api repos/$GITHUB_REPOSITORY/releases | jq -r '[.[].tag_name]')"\" >> $GITHUB_OUTPUT
   
   test-pod-release:
     needs: get-releases
     runs-on: ubuntu-latest
     strategy:
       matrix: 
-        tag: ${{ fromJson(needs.get-releases.outputs.matrix) }}
+        tag: ${{ needs.get-releases.outputs.matrix }}
         db: ['mariadb', 'mysql']
     steps:
       - name: Start LocalStack Default
