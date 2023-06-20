@@ -63,9 +63,9 @@ jobs:
           docker pull localstack/localstack-pro:${{ matrix.tag }}
           # Start LocalStack in the background
           if [ "mysql" ==  ${MYSQL_FEATURE_FLAG} ]; then
-            LS_LOG=trace RDS_MYSQL_DOCKER=1 localstack start -d
+            DEBUG=1 RDS_MYSQL_DOCKER=1 localstack start -d
           else
-            LS_LOG=trace localstack start -d
+            DEBUG=1 localstack start -d
           fi
           # Wait 30 seconds for the LocalStack container to become ready before timing out
           echo "Waiting for LocalStack startup..."
@@ -87,4 +87,8 @@ jobs:
             cat output
             exit 1
           fi
+      - name: Show Logs
+        if: failure()
+        run: |
+          localstack logs
     
