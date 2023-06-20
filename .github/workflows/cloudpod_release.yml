@@ -1,52 +1,55 @@
 on:
-    workflow_dispatch:
-        inputs:
-            release_tag:
-                type: string
-                required: true
-            database_type: 
-                type: string
-                required: true
-    push:
-        paths-ignore:
-            - 'README.md'
-        branches:
-            - main
-            - cloudpod_workflow
+  workflow_dispatch:
+    inputs:
+      release-tag:
+        type: string
+        required: true
+  push:
+    paths-ignore:
+      - 'README.md'
+    branches:
+      - main
+      - cloudpod_workflow
             
 permissions:
-    contents: write
+  contents: write
 
 name: Create Release
 jobs:
-    build:
-        uses: ./.github/workflows/setup.yml
-        secrets: inherit
+  build:
+    strategy:
+      matrix:
+        database-type: [mysql, mariadb]
+    uses: ./.github/workflows/setup.yml
+    secrets: inherit
+    with:
+      store-cloudpod: "true"
+      database-type: ${{ matrix.database-type }}
+      localstack-version: ${{ inputs.release-tag || 'latest'}}
+  upload:
+    needs: build
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Pod Artifacts
+        uses: actions/download-artifact@v3
         with:
-            store-cloudpod: "true"
-            database-type: ${{ inputs.database_type || 'mysql' }}
-            localstack-version: ${{ inputs.release_tag || 'latest'}}
-    upload:
-      needs: build
-      name: Upload Release Asset
-      runs-on: ubuntu-latest
-      steps:
-        - name: Download Artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: cloudpod
-        - name: Display structure of downloaded files
-          run: ls -R
-        - name: Build project # This would actually build your project, using zip for an example artifact
-          run: |
-            echo "Cloudpod Release Version ${{ inputs.release_tag || 'latest'}}" > Release.txt
-        - name: Create Release
-          id: create_release
-          uses: softprops/action-gh-release@v1
-          with:
-            tag_name: "v-${{ inputs.release_tag || 'latest'}}"
-            name: "Cloudpod for LocalStack release ${{ inputs.release_tag || 'latest'}}"
-            body: "Test Release ${{ inputs.release_tag || 'latest'}} for database ${{ inputs.database_type || 'mysql' }}"
-            files: |
-                ./release-pod.zip
-                Release.txt
+          name: cloudpod
+      - name: Display structure of downloaded files
+        run: ls -R
+      - name: Prepare Release.txt
+        run: |
+          echo "Cloud Pod Release for LocalStack Version ${{ inputs.release-tag || 'latest'}}." > Release.txt
+          echo "Please use the 'release-pod-{database}.zip' you need for your configuration." >> Release.txt
+          echo "By default LocalStack uses the engine 'mariadb'. If you start LocalStack with 'RDS_MYSQL_DOCKER=1', please use the 'mysql' pod." >> Release.txt
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "${{ inputs.release-tag || 'latest'}}"
+          name: "Cloud Pod for LocalStack Version '${{ inputs.release-tag || 'latest'}}'"
+          body: "The release features a cloud pod for LocalStack version '${{ inputs.release-tag || 'latest'}}'"
+          files: |
+              ./release-pod-mysql.zip
+              ./release-pod-mariadb.zip
+              Release.txt

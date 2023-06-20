@@ -1,79 +1,77 @@
-name: Setup LocalStack
+name: Setup Sample with LocalStack
 on:
-    workflow_call:
-        inputs:
-            store-cloudpod:
-              required: true
-              type: string
-            database-type:
-                required: true
-                type: string
-            localstack-version:
-                required: true
-                type: string
+  workflow_call:
+    inputs:
+      store-cloudpod:
+        required: true
+        type: string
+      database-type:
+        required: true
+        type: string
+      localstack-version:
+        required: true
+        type: string
       
 jobs:
-    setup-localstack:
-      name: Setup infrastructure
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-  
-        - name: Setup Python
-          uses: actions/setup-python@v4
-          with:
-            python-version: '3.9'
-  
-        - name: Setup Nodejs
-          uses: actions/setup-node@v3
-          with:
-            node-version: 16
-  
-        - name: Install dependencies
-          run: |
-            make install
-  
-        - name: Start LocalStack
-          env:
-            LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
-            LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
-            MYSQL_FEATURE_FLAG: ${{ inputs.database-type }}
-          run: |
-            mkdir ls_test
-            ls -la ls_test
-            docker pull localstack/localstack-pro:${{ inputs.localstack-version }}
-            # Start LocalStack in the background
-            if [ "mysql" ==  ${MYSQL_FEATURE_FLAG} ]; then
-              LS_LOG=trace RDS_MYSQL_DOCKER=1 localstack start -d
-            else
-              LS_LOG=trace localstack start -d
-            fi
-            # Wait 30 seconds for the LocalStack container to become ready before timing out
-            echo "Waiting for LocalStack startup..."
-            localstack wait -t 15
-            echo "Startup complete"
-  
-        - name: Deploy the application
-          env: 
-            AWS_ACCESS_KEY_ID: test
-            AWS_SECRET_ACCESS_KEY: test
-            AWS_DEFAULT_REGION: us-east-1
-          run: |
-            make build
-            make bootstrap
-            make deploy
-        
-        - name: Store Pod
-          if: ${{ inputs.store-cloudpod == 'true' }}
-          run: |
-            localstack pod save file://release-pod.zip
-        - name: Upload Pod as Artifact
-          if: ${{ inputs.store-cloudpod == 'true' }}
-          uses: actions/upload-artifact@v3
-          with:
-              name: cloudpod
-              path: release-pod.zip
-              retention-days: 1
+  setup-localstack:
+    name: Setup infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Setup Nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: |
+          make install
+
+      - name: Start LocalStack
+        env:
+          LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
+          LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
+          MYSQL_FEATURE_FLAG: ${{ inputs.database-type }}
+        run: |
+          mkdir ls_test
+          ls -la ls_test
+          docker pull localstack/localstack-pro:${{ inputs.localstack-version }}
+          # Start LocalStack in the background
+          if [ "mysql" ==  ${MYSQL_FEATURE_FLAG} ]; then
+            LS_LOG=trace RDS_MYSQL_DOCKER=1 localstack start -d
+          else
+            LS_LOG=trace localstack start -d
+          fi
+          # Wait 30 seconds for the LocalStack container to become ready before timing out
+          echo "Waiting for LocalStack startup..."
+          localstack wait -t 15
+          echo "Startup complete"
+
+      - name: Deploy the application
+        env: 
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          make build
+          make bootstrap
+          make deploy
+      
+      - name: Store Pod
+        if: ${{ inputs.store-cloudpod == 'true' }}
+        run: |
+          localstack pod save file://release-pod-${{ inputs.database-type }}.zip
+      - name: Upload Pod as Artifact
+        if: ${{ inputs.store-cloudpod == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: cloudpod
+          path: release-pod-${{ inputs.database-type }}.zip
+          retention-days: 1
