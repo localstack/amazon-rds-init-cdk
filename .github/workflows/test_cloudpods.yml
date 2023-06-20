@@ -24,7 +24,7 @@ jobs:
       run: |
         output=$(gh api repos/$GITHUB_REPOSITORY/releases | jq  '[.[].tag_name]')
         output=$(echo $output | tr '\n' ' ')
-        echo "matrix=$output >> $GITHUB_OUTPUT
+        echo "matrix=$output" >> $GITHUB_OUTPUT
   
   test-pod-release:
     needs: get-releases
