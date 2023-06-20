@@ -19,10 +19,10 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
     - id: set-matrix
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        echo "gh api repos/$GITHUB_REPOSITORY/releases | jq -r '[.[].tag_name]'"
-        echo "$(gh api repos/$GITHUB_REPOSITORY/releases | jq -r '[.[].tag_name]')"
-        echo "matrix=$(gh api repos/$GITHUB_REPOSITORY/releases | jq -r '[.[].tag_name]')" >> $GITHUB_OUTPUT"
+        echo "matrix=$(gh api repos/$GITHUB_REPOSITORY/releases | jq -r '[.[].tag_name]')" >> $GITHUB_OUTPUT
   
   test-pod-release:
     needs: get-releases
