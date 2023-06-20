@@ -48,6 +48,7 @@ jobs:
             LS_LOG=trace RDS_MYSQL_DOCKER=1 localstack start -d
           else
             LS_LOG=trace localstack start -d
+          fi
           # Wait 30 seconds for the LocalStack container to become ready before timing out
           echo "Waiting for LocalStack startup..."
           localstack wait -t 15
