@@ -1,0 +1,73 @@
+name: Test Released Cloud Pods
+
+on:
+  #schedule: TODO activate
+    # “At 00:00 on Saturday.”
+  #  - cron: "0 0 * * 6"
+  workflow_dispatch:
+  push: # TODO remove
+    paths-ignore:
+      - 'README.md'
+    branches:
+      - cloudpod_workflow
+
+jobs:
+  get-releases:
+    name: Retrieve Released Cloud Pods
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - id: set-matrix
+      run: echo "::set-output name=matrix::$(gh api repos/$GITHUB_REPOSITORY/releases | jq -r '[.[].tag_name]')"
+  
+  test-pod-release:
+    needs: get-releases
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        tag: ${{ fromJson(needs.get-releases.outputs.matrix) }}
+        db: ['mariadb', 'mysql']
+    steps:
+      - name: Start LocalStack Default
+        env:
+          LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
+          LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
+          MYSQL_FEATURE_FLAG: ${{ matrix.mysql-feature-flag }}
+        run: |
+          mkdir ls_test
+          ls -la ls_test
+          docker pull localstack/localstack-pro:${{ matrix.tag }}
+          # Start LocalStack in the background
+          if [ "mysql" ==  ${MYSQL_FEATURE_FLAG} ]; then
+            LS_LOG=trace RDS_MYSQL_DOCKER=1 localstack start -d
+          else
+            LS_LOG=trace localstack start -d
+          # Wait 30 seconds for the LocalStack container to become ready before timing out
+          echo "Waiting for LocalStack startup..."
+          localstack wait -t 15
+          echo "Startup complete"
+      - name: Retrieve Pod mariadb
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'dsaltares/godot-wild-jam-18'
+          version: 'tags/${{ matrix.tag }}'
+          file: 'release-pod-${{ matrix.db }}.zip'
+          target: './release-pod.zip'
+      - name: Inject mariadb pod
+        run: localstack pod load file://release-pod.zip
+      - name: Run Smoke Tests
+        run: |
+          awslocal lambda invoke --cli-binary-format raw-in-base64-out --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "show tables", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
+          echo "show tables:"
+          cat output
+          awslocal lambda invoke --cli-binary-format raw-in-base64-out --function-name my-lambda-rds-query-helper --payload '{"sqlQuery": "select Author from Books", "secretName":"/rdsinitexample/rds/creds/mysql-01"}' output
+          echo "select Author from Books:"
+          cat output
+          return_status=$(cat output | jq -r .status)
+          if [ "SUCCESS" !=  ${return_status} ]; then
+            echo "unexpected response: ${return_status}"
+            cat output
+            exit 1
+          fi
+    
