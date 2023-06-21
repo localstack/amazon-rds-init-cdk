@@ -69,7 +69,7 @@ jobs:
           ./test-helper/smoke-test.sh
       - name: Save the Cloud Pod 
         if: ${{ inputs.store-cloudpod == 'true' }}
-        uses: HarshCasper/cloud-pod-save-action@0.1.0
+        uses: HarshCasper/cloud-pod-save@v0.1.0
         with:
           name: 'release-pod-${{ inputs.database-type }}.zip'
           location: 'disk'
