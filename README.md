@@ -222,6 +222,25 @@ Then run:
 localstack pod load file://$(pwd)/release-pod-mysql.zip
 ```
 
+
+### Troubleshooting Cloud Pod Injection
+
+If you are on MacOS using the Docker Desktop App, and you want to inject the mysql pod, you might need to change some settings.
+
+The error message in LocalStack is visible when you enable debugging (`DEBUG=1`):
+
+```
+Different lower_case_table_names settings for server ('2') and data dictionary ('0').
+Data Dictionary initialization failed.
+```
+
+To fix this, go to the settings of the Docker Desktop App -> General, and then select `osxfs (Legacy)` for file sharing:
+
+![Change the Docker Desktop Setting](images/screenshot_docker_desktop_setting.png)
+
+Apply the changes, and restart LocalStack before attempting to inject the pod again.
+
+
 ## Contributing
 
 We appreciate your interest in contributing to our project and are always looking for new ways to improve the developer experience. We welcome feedback, bug reports, and even feature ideas from the community.

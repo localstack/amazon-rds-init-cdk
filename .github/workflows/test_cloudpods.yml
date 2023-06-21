@@ -90,6 +90,10 @@ jobs:
             state=$(awslocal rds describe-db-instances | jq -r ".DBInstances[0].DBInstanceStatus")
           done
 
+      # checkout to run the smoke-test.sh
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Run Smoke Tests
         run: |
           ./test-helper/smoke-test.sh
