@@ -30,6 +30,7 @@ jobs:
     needs: get-releases
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix: 
         tag: ${{ fromJson(needs.get-releases.outputs.matrix) }}
         db: ['mariadb', 'mysql']
