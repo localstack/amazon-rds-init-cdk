@@ -38,6 +38,10 @@ jobs:
         tag: ${{ fromJson(needs.get-releases.outputs.matrix) }}
         db: ['mariadb', 'mysql']
     steps:
+      # checkout to run the smoke-test.sh
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Retrieve Pod
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -89,10 +93,6 @@ jobs:
             sleep 1
             state=$(awslocal rds describe-db-instances | jq -r ".DBInstances[0].DBInstanceStatus")
           done
-
-      # checkout to run the smoke-test.sh
-      - name: Checkout
-        uses: actions/checkout@v3
 
       - name: Run Smoke Tests
         run: |
