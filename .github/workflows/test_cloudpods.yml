@@ -5,11 +5,6 @@ on:
     # “At 00:00 on Saturday.”
     - cron: "0 0 * * 6"
   workflow_dispatch:
-  push: # TODO remove
-    paths-ignore:
-      - 'README.md'
-    branches:
-      - cloudpod_workflow
 
 permissions:
   contents: write
@@ -82,7 +77,7 @@ jobs:
           fi
           # Wait 30 seconds for the LocalStack container to become ready before timing out
           echo "Waiting for LocalStack startup..."
-          localstack wait -t 15
+          localstack wait -t 30
           echo "Startup complete"
 
       - name: Inject Pod
