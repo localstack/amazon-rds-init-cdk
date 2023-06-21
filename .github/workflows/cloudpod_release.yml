@@ -38,17 +38,17 @@ jobs:
         run: ls -R
       - name: Prepare Release.txt
         run: |
-          echo "Cloud Pod Release for LocalStack Version ${{ inputs.release-tag || 'latest'}}." > Release.txt
-          echo "Please use the 'release-pod-{database}.zip' you need for your configuration." >> Release.txt
-          echo "By default LocalStack uses the engine 'mariadb'. If you start LocalStack with 'RDS_MYSQL_DOCKER=1', please use the 'mysql' pod." >> Release.txt
+          echo "Cloud Pod of the Sample created with LocalStack Version ${{ inputs.release-tag || 'latest'}}." > Release.txt
+          echo " * Please use the 'release-pod-{database}.zip' you need for your configuration." >> Release.txt
+          echo " * By default LocalStack uses the engine 'mariadb', so you need 'release-pod-mariadb.zip' " >> Release.txt
+          echo " * If you start LocalStack with 'RDS_MYSQL_DOCKER=1', please use the 'mysql' pod ('release-pod-mysql.zip')" >> Release.txt
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "${{ inputs.release-tag || 'latest'}}"
           name: "Cloud Pod for LocalStack Version '${{ inputs.release-tag || 'latest'}}'"
-          body: "The release features a cloud pod for LocalStack version '${{ inputs.release-tag || 'latest'}}'"
+          body-path: ./Release.txt
           files: |
               ./release-pod-mysql.zip
               ./release-pod-mariadb.zip
-              Release.txt
