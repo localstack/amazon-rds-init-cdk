@@ -9,6 +9,7 @@ on:
       - 'README.md'
     branches:
       - main
+      - cloudpod_workflow # TODO remove
             
 permissions:
   contents: write
@@ -41,7 +42,9 @@ jobs:
           echo "Cloud Pod of the Sample created with LocalStack Version ${{ inputs.release-tag || 'latest'}}." > Release.txt
           echo " * Please use the 'release-pod-{database}.zip' you need for your configuration." >> Release.txt
           echo " * By default LocalStack uses the engine 'mariadb', so you need 'release-pod-mariadb.zip' " >> Release.txt
+          echo "   * Click here to inject the 'mariadb' pod into your running LocalStack instance: [![LocalStack Pods Launchpad](https://localstack.cloud/gh/launch-pod-badge.svg)](https://app.localstack.cloud/launchpad?url=https://github.com/$GITHUB_REPOSITORY/releases/download/${{ inputs.release-tag || 'latest'}}/release-pod-mariadb.zip)" >> Release.txt
           echo " * If you start LocalStack with 'RDS_MYSQL_DOCKER=1', please use the 'mysql' pod ('release-pod-mysql.zip')" >> Release.txt
+          echo "   * Click here to inject the 'mysql' pod into your running LocalStack instance: [![LocalStack Pods Launchpad](https://localstack.cloud/gh/launch-pod-badge.svg)](https://app.localstack.cloud/launchpad?url=https://github.com/$GITHUB_REPOSITORY/releases/download/${{ inputs.release-tag || 'latest'}}/release-pod-mysql.zip)" >> Release.txt
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
