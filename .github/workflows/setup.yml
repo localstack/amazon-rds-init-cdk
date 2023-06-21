@@ -63,11 +63,16 @@ jobs:
           make build
           make bootstrap
           make deploy
-      
-      - name: Store Pod
-        if: ${{ inputs.store-cloudpod == 'true' }}
+      # TODO should we run smoke tests before creating the pod?
+      - name: Run Smoke Tests
         run: |
-          localstack pod save file://release-pod-${{ inputs.database-type }}.zip
+          ./test-helper/smoke-test.sh
+      - name: Save the Cloud Pod 
+        if: ${{ inputs.store-cloudpod == 'true' }}
+        uses: HarshCasper/cloud-pod-save-action@0.1.0
+        with:
+          name: 'release-pod-${{ inputs.database-type }}.zip'
+          location: 'disk'
       - name: Upload Pod as Artifact
         if: ${{ inputs.store-cloudpod == 'true' }}
         uses: actions/upload-artifact@v3

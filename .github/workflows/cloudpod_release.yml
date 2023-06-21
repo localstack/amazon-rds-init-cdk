@@ -51,7 +51,7 @@ jobs:
         with:
           tag_name: "${{ inputs.release-tag || 'latest'}}"
           name: "Cloud Pod for LocalStack Version '${{ inputs.release-tag || 'latest'}}'"
-          body-path: ./Release.txt
+          body_path: ./Release.txt
           files: |
               ./release-pod-mysql.zip
               ./release-pod-mariadb.zip
