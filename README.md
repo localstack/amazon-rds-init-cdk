@@ -197,6 +197,31 @@ The implementation can be found in `lib/resource-initializer.ts`.
 
 More details about the original sample can be found in the AWS blog post — [Use AWS CDK to initialize Amazon RDS instances](https://aws.amazon.com/blogs/infrastructure-and-automation/use-aws-cdk-to-initialize-amazon-rds-instances/).
 
+
+## Cloud Pods
+
+[Cloud Pods](https://docs.localstack.cloud/user-guide/tools/cloud-pods/) are a mechanism that allows you to take a snapshot of the state in your current LocalStack instance, persist it to a storage backend, and easily share it with your team members.
+
+You can convert your current AWS infrastructure state to a Cloud Pod using the `localstack` CLI. 
+Check out our [Getting Started guide](https://docs.localstack.cloud/user-guide/tools/cloud-pods/getting-started/) and [LocalStack Cloud Pods CLI reference](https://docs.localstack.cloud/user-guide/tools/cloud-pods/pods-cli/) to learn more about Cloud Pods and how to use them.
+
+To inject a Cloud Pod you can use [Cloud Pods Launchpad](https://docs.localstack.cloud/user-guide/tools/cloud-pods/launchpad/) wich quickly injects Cloud Pods into your running LocalStack container. 
+
+> **NOTE**: The Cloud Pod linked here, was created with the `latest` LocalStack version, make sure you also run `latest` when injecting. 
+Further, LocalStack needs to be started with the flag `RDS_MYSQL_DOCKER=1`. For different flavors check the available [releases](https://github.com/localstack/amazon-rds-init-cdk/releases).
+
+Click here [![LocalStack Pods Launchpad](https://localstack.cloud/gh/launch-pod-badge.svg)](https://app.localstack.cloud/launchpad?url=https://github.com/localstack/amazon-rds-init-cdk/releases/download/latest/release-pod-mysql.zip) to launch the Cloud Pods Launchpad and inject the Cloud Pod for this application by clicking the `Inject` button.
+
+![Cloud Pod injection with the Cloud Pod Launchpad](images/screenshot_launchpad.png)
+
+Alternatively, you can inject the pod by using the `localstack` CLI. 
+First, you need to download the pod you want to inject from the [releases](https://github.com/localstack/amazon-rds-init-cdk/releases).
+Then run:
+
+```sh
+localstack pod load file://$(pwd)/release-pod-mysql.zip
+```
+
 ## Contributing
 
 We appreciate your interest in contributing to our project and are always looking for new ways to improve the developer experience. We welcome feedback, bug reports, and even feature ideas from the community.

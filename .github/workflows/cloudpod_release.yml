@@ -39,15 +39,15 @@ jobs:
         run: ls -R
       - name: Prepare Release Notes
         run: |
-          echo "This release includes the Cloud Pod of the sample created with LocalStack Version `${{ inputs.release-tag || 'latest'}}`." > Release.txt
-          echo "Please use the `release-pod-{database}.zip` you need for your configuration." >> Release.txt
+          echo "This release includes the Cloud Pod of the sample created with LocalStack Version \`${{ inputs.release-tag || 'latest'}}\`." > Release.txt
+          echo "Please use the \`release-pod-{database}.zip\` you need for your configuration." >> Release.txt
           echo "### MariaDB" >> Release.txt
-          echo "By default LocalStack uses the engine `mariadb`, so you need `release-pod-mariadb.zip`." >> Release.txt
+          echo "By default LocalStack uses the engine \`mariadb\`, so you need \`release-pod-mariadb.zip\`." >> Release.txt
           echo "You can click the Launchpad to inject the pod into your running LocalStack instance:" >> Release.txt
           echo "[![LocalStack Pods Launchpad](https://localstack.cloud/gh/launch-pod-badge.svg)](https://app.localstack.cloud/launchpad?url=https://github.com/$GITHUB_REPOSITORY/releases/download/${{ inputs.release-tag || 'latest'}}/release-pod-mariadb.zip)"  >> Release.txt
           echo "### MySQL" >> Release.txt
-          echo "If you start LocalStack with `RDS_MYSQL_DOCKER=1`, please use the `mysql` pod `release-pod-mysql.zip`" >> Release.txt
-          echo "You can click the Launchpad to inject the `mysql` version of the pod into your running LocalStack instance:" >> Release.txt
+          echo "If you start LocalStack with \`RDS_MYSQL_DOCKER=1\`, please use the \`mysql\` pod \`release-pod-mysql.zip\`" >> Release.txt
+          echo "You can click the Launchpad to inject the \`mysql\` version of the pod into your running LocalStack instance:" >> Release.txt
           echo "[![LocalStack Pods Launchpad](https://localstack.cloud/gh/launch-pod-badge.svg)](https://app.localstack.cloud/launchpad?url=https://github.com/$GITHUB_REPOSITORY/releases/download/${{ inputs.release-tag || 'latest'}}/release-pod-mysql.zip)" >> Release.txt
       - name: Create Release
         id: create_release
