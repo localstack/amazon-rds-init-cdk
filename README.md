@@ -196,3 +196,8 @@ The implementation can be found in `lib/resource-initializer.ts`.
 ## Learn More
 
 More details about the original sample can be found in the AWS blog post — [Use AWS CDK to initialize Amazon RDS instances](https://aws.amazon.com/blogs/infrastructure-and-automation/use-aws-cdk-to-initialize-amazon-rds-instances/).
+
+## Contributing
+
+We appreciate your interest in contributing to our project and are always looking for new ways to improve the developer experience. We welcome feedback, bug reports, and even feature ideas from the community.
+Please refer to the [contributing file](CONTRIBUTING.md) for more details on how to get started. 
