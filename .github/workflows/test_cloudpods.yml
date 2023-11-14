@@ -29,9 +29,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix: 
-        tag: ${{ fromJson(needs.get-releases.outputs.matrix) }}
-        db: ['mariadb', 'mysql']
     steps:
       # checkout to run the smoke-test.sh
       - name: Checkout
@@ -62,7 +59,6 @@ jobs:
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
           LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
-          MYSQL_FEATURE_FLAG: ${{ matrix.db }}
           DEBUG: 1 
           POD_LOAD_CLI_TIMEOUT: 300
         run: |
@@ -70,11 +66,7 @@ jobs:
           ls -la ls_test
           docker pull localstack/localstack-pro:${{ matrix.tag }}
           # Start LocalStack in the background
-          if [ "mysql" ==  ${MYSQL_FEATURE_FLAG} ]; then
-            RDS_MYSQL_DOCKER=1 localstack start -d
-          else
-            localstack start -d
-          fi
+          localstack start -d
           # Wait 30 seconds for the LocalStack container to become ready before timing out
           echo "Waiting for LocalStack startup..."
           localstack wait -t 30

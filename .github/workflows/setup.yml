@@ -5,9 +5,6 @@ on:
       store-cloudpod:
         required: true
         type: string
-      database-type:
-        required: true
-        type: string
       localstack-version:
         required: true
         type: string
@@ -38,17 +35,12 @@ jobs:
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
           LOCALSTACK_VOLUME_DIR: ${{ github.workspace }}/ls_test
-          MYSQL_FEATURE_FLAG: ${{ inputs.database-type }}
         run: |
           mkdir ls_test
           ls -la ls_test
           docker pull localstack/localstack-pro:${{ inputs.localstack-version }}
           # Start LocalStack in the background
-          if [ "mysql" ==  ${MYSQL_FEATURE_FLAG} ]; then
-            LS_LOG=trace RDS_MYSQL_DOCKER=1 localstack start -d
-          else
-            LS_LOG=trace localstack start -d
-          fi
+          LS_LOG=trace localstack start -d
           # Wait 30 seconds for the LocalStack container to become ready before timing out
           echo "Waiting for LocalStack startup..."
           localstack wait -t 30
@@ -73,7 +65,7 @@ jobs:
         if: ${{ inputs.store-cloudpod == 'true' }}
         uses: HarshCasper/cloud-pod-save@v0.1.0
         with:
-          name: 'release-pod-${{ inputs.database-type }}.zip'
+          name: 'release-pod-mysql.zip'
           location: 'disk'
 
       - name: Upload Pod as Artifact
@@ -81,5 +73,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: cloudpod
-          path: release-pod-${{ inputs.database-type }}.zip
+          path: release-pod-mysql.zip
           retention-days: 1
