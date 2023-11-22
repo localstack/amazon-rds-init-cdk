@@ -7,12 +7,14 @@ const fs = require('fs')
 const path = require('path')
 require('dotenv').config();
 
-// the env LOCALSTACK_HOSTNAME is automatically injected and available
-const hostname = process.env.LOCALSTACK_HOSTNAME;
+// the env AWS_ENDPOINT_URL is automatically injected and available
+const endpoint = process.env.AWS_ENDPOINT_URL;
+const url = new URL(endpoint);
+const hostname = url.hostname;
 
 // configure the secretsmanager to connect to the running LocalStack instance
 const secrets = new AWS.SecretsManager({ 
-  endpoint: 'http://' + hostname + ':4566',
+  endpoint: endpoint,
   accessKeyId: 'test',
   secretAccessKey: 'test',
   region: 'us-east-1',
