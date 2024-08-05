@@ -37,17 +37,17 @@ You can build and deploy the sample application on LocalStack by running our `Ma
 
 ### Run LocalStack
 
-Start LocalStack Pro with the `LOCALSTACK_API_KEY` pre-configured:
+Start LocalStack Pro with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
 
 ```shell
-export LOCALSTACK_API_KEY=<your-api-key>
+export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
 localstack start
 ```
 
 The sample application uses RDS with a MySQL Engine. Currently, by default LocalStack will use a MariaDB engine instead (check details in our [RDS documentation](https://docs.localstack.cloud/user-guide/aws/rds/#mysql-engine)). You can enable the use of real MySQL engine, which will start a MySQL instance in a separate docker container, by setting the env `RDS_MYSQL_DOCKER=1`. Run the following command to start LocalStack with MySQL engine:
 
 ```shell
-export LOCALSTACK_API_KEY=<your-api-key>
+export LOCALSTACK_AUTH_TOKEN=<your-api-key>
 RDS_MYSQL_DOCKER=1 localstack start
 ```
 
